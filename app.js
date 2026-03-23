@@ -2,6 +2,8 @@ import express from "express";
 
 const app = express();
 
+console.log("NEW VERSION");
+
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => {
@@ -11,7 +13,6 @@ app.get("/", (req, res) => {
 app.post("/analyze", async (req, res) => {
   const image = req.body.image;
 
-  // пока просто тест
   res.json({
     food: "Паста",
     calories: 520
