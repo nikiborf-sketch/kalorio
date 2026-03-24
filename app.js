@@ -1,31 +1,31 @@
 const express = require("express");
+
 const app = express();
 
-// важно для работы с JSON
+// чтобы принимать JSON
 app.use(express.json());
 
-// тест главной страницы
+// главная страница
 app.get("/", (req, res) => {
   res.send("Kalorio API работает 🚀");
 });
 
-// тест analyze через браузер (GET)
+// GET /analyze (проверка)
 app.get("/analyze", (req, res) => {
   res.send("analyze работает ✅");
 });
 
-// основной endpoint (POST)
+// POST /analyze (основной endpoint)
 app.post("/analyze", (req, res) => {
   console.log("NEW VERSION 🚀");
 
-  // пока заглушка (потом подключим AI)
   res.json({
     food: "Паста",
     calories: 520
   });
 });
 
-// ВАЖНО для Railway
+// ВАЖНО ДЛЯ RAILWAY
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
