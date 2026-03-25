@@ -1,31 +1,31 @@
-const express = require("express");
+import express from "express";
+import multer from "multer";
 
 const app = express();
 
-// чтобы принимать JSON
-app.use(express.json());
+// настройка загрузки файлов
+const upload = multer({ dest: "uploads/" });
 
-// главная страница
+// главная
 app.get("/", (req, res) => {
   res.send("Kalorio API работает 🚀");
 });
 
-// GET /analyze (проверка)
-app.get("/analyze", (req, res) => {
-  res.send("analyze работает ✅");
-});
+// анализ (POST с фото)
+app.post("/analyze", upload.single("image"), async (req, res) => {
+  console.log("Фото получено");
 
-// POST /analyze (основной endpoint)
-app.post("/analyze", (req, res) => {
-  console.log("NEW VERSION 🚀");
-
+  // пока заглушка (потом AI)
   res.json({
     food: "Паста",
-    calories: 520
+    calories: 520,
+    protein: 20,
+    fat: 10,
+    carbs: 70
   });
 });
 
-// ВАЖНО ДЛЯ RAILWAY
+// порт для Railway
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
