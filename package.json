@@ -1,9 +1,7 @@
 {
   "name": "kalorio-api",
   "version": "1.0.0",
-  "description": "Kalorio food analyzer API",
   "main": "app.js",
-  "type": "module",
   "scripts": {
     "start": "node app.js"
   },
