@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kalorio</title>
+</head>
+<body style="background:black;color:white;text-align:center;padding:30px">
+
+<h1>🍽 Kalorio</h1>
+
+<input type="file" id="fileInput" />
+<br><br>
+<button onclick="sendImage()">Анализировать</button>
+
+<div id="result"></div>
+
+<script>
+async function sendImage() {
+  const file = document.getElementById("fileInput").files[0];
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch("/analyze", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  document.getElementById("result").innerHTML =
+    "🍽 " + data.food + "<br>" +
+    "🔥 Калории: " + data.calories;
+}
+</script>
+
+</body>
+</html>
