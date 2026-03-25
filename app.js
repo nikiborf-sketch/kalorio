@@ -7,8 +7,12 @@ const app = express();
 const upload = multer({ dest: "uploads/" });
 
 // главная
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "public")));
+
 app.get("/", (req, res) => {
-  res.send("Kalorio API работает 🚀");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // POST
