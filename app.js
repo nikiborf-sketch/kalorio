@@ -50,9 +50,15 @@ app.post("/analyze", upload.single("image"), async (req, res) => {
       ],
     });
 
-    const result = response.choices[0].message.content;
+    const raw = response.choices[0].message.content;
 
-    res.json({ result });
+// убираем ```json
+const cleaned = raw.replace(/```json|```/g, "").trim();
+
+const parsed = JSON.parse(cleaned);
+
+res.json(parsed);
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Ошибка анализа" });
