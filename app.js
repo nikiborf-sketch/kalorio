@@ -30,14 +30,14 @@ app.post("/analyze", upload.single("image"), async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "Ты эксперт по питанию. Определи еду и оцени КБЖУ.",
+          content: "Ты эксперт по питанию. Определи блюдо и оцени КБЖУ.",
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Определи блюдо и верни JSON: food, calories, protein, fat, carbs",
+              text: "Определи блюдо и верни JSON строго в формате: food, calories, protein, fat, carbs",
             },
             {
               type: "image_url",
@@ -52,16 +52,22 @@ app.post("/analyze", upload.single("image"), async (req, res) => {
 
     const raw = response.choices[0].message.content;
 
-// убираем ```json
-const cleaned = raw.replace(/```json|```/g, "").trim();
+    // 🔥 надежное извлечение JSON
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
 
-const parsed = JSON.parse(cleaned);
+    if (!jsonMatch) {
+      return res.status(500).json({ error: "Не удалось извлечь JSON", raw });
+    }
 
-res.json(parsed);
-    
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    res.json(parsed);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Ошибка анализа" });
+    console.error("Ошибка:", error);
+    res.status(500).json({
+      error: "Ошибка анализа",
+      details: error.message,
+    });
   }
 });
 
