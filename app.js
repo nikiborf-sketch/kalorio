@@ -1,33 +1,65 @@
-const express = require("express");
-const multer = require("multer");
+import express from "express";
+import multer from "multer";
+import OpenAI from "openai";
 
 const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
 
-// загрузка файлов
-const upload = multer({ dest: "uploads/" });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// главная
-const path = require("path");
-
-app.use(express.static(path.join(__dirname, "public")));
-
+// главная страница
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.send("Kalorio API работает 🚀");
 });
 
-// POST
-app.post("/analyze", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "Нет файла" });
+// анализ фото еды
+app.post("/analyze", upload.single("image"), async (req, res) => {
+  try {
+    const image = req.file;
+
+    if (!image) {
+      return res.status(400).json({ error: "Нет изображения" });
+    }
+
+    const base64Image = image.buffer.toString("base64");
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Ты эксперт по питанию. Определи еду и оцени КБЖУ.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Определи блюдо и верни JSON: food, calories, protein, fat, carbs",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = response.choices[0].message.content;
+
+    res.json({ result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Ошибка анализа" });
   }
-
-  res.json({
-    food: "Паста",
-    calories: 520
-  });
 });
 
-// порт
+// порт для Railway
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
