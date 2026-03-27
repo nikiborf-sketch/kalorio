@@ -3,20 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <title>Kalorio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="background:black;color:white;text-align:center;padding:30px">
+
+<body style="
+  margin:0;
+  font-family: sans-serif;
+  background:#0f0f0f;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
+">
 
 <h1>🍽 Kalorio</h1>
 
-<input type="file" id="fileInput" />
-<br><br>
-<button onclick="sendImage()">Анализировать</button>
+<input type="file" id="fileInput" accept="image/*" style="display:none"/>
 
-<div id="result"></div>
+<button onclick="pickFile()" style="
+  padding:12px 20px;
+  border-radius:12px;
+  border:none;
+  background:#4CAF50;
+  color:white;
+  font-size:16px;
+">
+  📸 Выбрать фото
+</button>
+
+<br>
+
+<img id="preview" style="
+  margin-top:20px;
+  max-width:90%;
+  border-radius:12px;
+  display:none;
+"/>
+
+<br>
+
+<button onclick="sendImage()" style="
+  padding:12px 20px;
+  border-radius:12px;
+  border:none;
+  background:#2196F3;
+  color:white;
+  font-size:16px;
+">
+  🔍 Анализировать
+</button>
+
+<div id="loader" style="margin-top:20px; display:none;">
+  ⏳ Анализируем...
+</div>
+
+<div id="result" style="
+  margin-top:20px;
+  padding:15px;
+  border-radius:15px;
+  background:#1c1c1c;
+  width:90%;
+  display:none;
+">
+</div>
 
 <script>
+
+function pickFile() {
+  document.getElementById("fileInput").click();
+}
+
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+
+fileInput.addEventListener("change", () => {
+  const file = fileInput.files[0];
+
+  if (file) {
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+  }
+});
+
 async function sendImage() {
-  const file = document.getElementById("fileInput").files[0];
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Выбери фото");
+    return;
+  }
+
+  document.getElementById("loader").style.display = "block";
+  document.getElementById("result").style.display = "none";
 
   const formData = new FormData();
   formData.append("image", file);
@@ -28,10 +107,20 @@ async function sendImage() {
 
   const data = await res.json();
 
-  document.getElementById("result").innerHTML =
-    "🍽 " + data.food + "<br>" +
-    "🔥 Калории: " + data.calories;
+  document.getElementById("loader").style.display = "none";
+
+  const resultDiv = document.getElementById("result");
+  resultDiv.style.display = "block";
+
+  resultDiv.innerHTML = `
+    <h2>${data.food}</h2>
+    <p>🔥 Калории: ${data.calories}</p>
+    <p>🥩 Белки: ${data.protein}</p>
+    <p>🧈 Жиры: ${data.fat}</p>
+    <p>🍞 Углеводы: ${data.carbs}</p>
+  `;
 }
+
 </script>
 
 </body>
