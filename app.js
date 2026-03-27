@@ -10,9 +10,13 @@ const openai = new OpenAI({
 });
 
 // главная страница
-app.get("/", (req, res) => {
-  res.send("Kalorio API работает 🚀");
-});
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, "public")));
 
 // анализ фото еды
 app.post("/analyze", upload.single("image"), async (req, res) => {
