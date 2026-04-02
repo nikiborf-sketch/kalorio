@@ -187,3 +187,88 @@ window.onload = () => {
     }
   } catch (e) {
     showWelcome();
+  }
+};
+
+// ЗАГРУЗКА
+
+function pickImage() {
+  document.getElementById("fileInput").click();
+}
+
+async function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  lastImage = URL.createObjectURL(file);
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const res = await fetch("/analyze", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    lastResult = data;
+
+    document.getElementById("resultImage").src = lastImage;
+    document.getElementById("foodName").innerText = data.food;
+    document.getElementById("calories").innerText = data.calories + " ккал";
+    document.getElementById("protein").innerText = data.protein;
+    document.getElementById("fat").innerText = data.fat;
+    document.getElementById("carbs").innerText = data.carbs;
+
+    showResult();
+
+  } catch (err) {
+    alert("Ошибка анализа");
+    console.error(err);
+  }
+}
+
+// ДОБАВЛЕНИЕ
+
+function confirmAdd() {
+  document.getElementById("popup").style.display = "block";
+}
+
+function selectMeal(type) {
+  meals[type].push(lastResult);
+
+  document.getElementById("popup").style.display = "none";
+
+  updateUI();
+  showHome();
+}
+
+// ОБНОВЛЕНИЕ
+
+function updateUI() {
+  const b = sum(meals.breakfast);
+  const l = sum(meals.lunch);
+  const d = sum(meals.dinner);
+
+  document.getElementById("breakfast").innerText = b;
+  document.getElementById("lunch").innerText = l;
+  document.getElementById("dinner").innerText = d;
+  document.getElementById("total").innerText = b + l + d;
+}
+
+function sum(arr) {
+  return arr.reduce((a, i) => a + (i.calories || 0), 0);
+}
+
+// ПЕРЕСНЯТЬ
+
+function retake() {
+  showHome();
+}
+
+</script>
+
+</body>
+</html>
