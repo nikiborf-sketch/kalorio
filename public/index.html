@@ -177,14 +177,22 @@ function hideAll() {
   document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
 }
 
-// 🔥 СТАРТ БЕЗ БАГОВ
+// 🔥 СТАРТ + ЗАГРУЗКА ДАННЫХ
 window.onload = () => {
   try {
+    const savedMeals = localStorage.getItem("meals");
+
+    if (savedMeals) {
+      meals = JSON.parse(savedMeals);
+      updateUI();
+    }
+
     if (localStorage.getItem("started")) {
       showHome();
     } else {
       showWelcome();
     }
+
   } catch (e) {
     showWelcome();
   }
@@ -226,7 +234,6 @@ async function handleFile(e) {
 
   } catch (err) {
     alert("Ошибка анализа");
-    console.error(err);
   }
 }
 
@@ -238,6 +245,9 @@ function confirmAdd() {
 
 function selectMeal(type) {
   meals[type].push(lastResult);
+
+  // 🔥 СОХРАНЕНИЕ
+  localStorage.setItem("meals", JSON.stringify(meals));
 
   document.getElementById("popup").style.display = "none";
 
