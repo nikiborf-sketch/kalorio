@@ -55,6 +55,7 @@
     .row {
       display: flex;
       gap: 10px;
+      justify-content: space-between;
     }
 
     button {
@@ -96,32 +97,26 @@
 <div id="welcome" class="screen">
   <div class="logo">Калорио</div>
   <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c">
-
   <div class="card">Добро пожаловать в Калорио</div>
-
   <button onclick="start()">Начать</button>
 </div>
 
 <!-- HOME -->
 <div id="home" class="screen">
-
   <div class="logo">Калорио</div>
 
   <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c">
 
   <div class="card">Всего: <span id="total">0</span> ккал</div>
-
   <div class="card">Завтрак: <span id="breakfast">0</span></div>
   <div class="card">Обед: <span id="lunch">0</span></div>
   <div class="card">Ужин: <span id="dinner">0</span></div>
 
   <button onclick="pickImage()">Отсканировать</button>
-
 </div>
 
 <!-- RESULT -->
 <div id="result" class="screen">
-
   <div class="logo">Калорио</div>
 
   <img id="resultImage">
@@ -139,7 +134,6 @@
 
   <button onclick="confirmAdd()">Добавить</button>
   <button onclick="retake()">Переснять</button>
-
 </div>
 
 <input type="file" id="fileInput" hidden onchange="handleFile(event)" />
@@ -156,7 +150,6 @@
 let meals = { breakfast: [], lunch: [], dinner: [] };
 let lastResult = null;
 let lastImage = null;
-let selectedMeal = null;
 
 // НАВИГАЦИЯ
 
@@ -184,14 +177,13 @@ function hideAll() {
   document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
 }
 
-// ЗАГРУЗКА
-
-function pickImage() {
-  document.getElementById("fileInput").click();
-}
-
-async function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  lastImage = URL.
+// 🔥 СТАРТ БЕЗ БАГОВ
+window.onload = () => {
+  try {
+    if (localStorage.getItem("started")) {
+      showHome();
+    } else {
+      showWelcome();
+    }
+  } catch (e) {
+    showWelcome();
