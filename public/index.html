@@ -2,129 +2,219 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kalorio</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f4d3c;
+      font-family: 'Inter Tight', sans-serif;
+      background: #0b4d3a;
       color: white;
-      text-align: center;
+      display: flex;
+      justify-content: center;
     }
 
-    .container {
+    .screen {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
       padding: 20px;
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
     }
 
-    .hidden {
-      display: none;
+    .active {
+      display: flex;
+    }
+
+    .logo {
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
     }
 
     img {
       width: 100%;
       border-radius: 20px;
+      margin-top: 20px;
     }
 
-    h1 {
-      font-size: 36px;
-      margin: 20px 0 10px;
+    .title {
+      text-align: center;
+      margin-top: 30px;
     }
 
-    p {
-      opacity: 0.8;
+    .title span {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+    }
+
+    .subtitle {
+      text-align: center;
+      opacity: 0.7;
+      margin-top: 10px;
     }
 
     button {
-      margin-top: 40px;
+      margin-top: auto;
       padding: 15px;
-      width: 90%;
       border-radius: 30px;
       border: none;
       font-size: 18px;
-      cursor: pointer;
     }
 
-    .start-btn {
+    .white {
       background: white;
       color: black;
     }
 
-    .upload-btn {
+    .card {
       background: white;
       color: black;
+      border-radius: 15px;
+      padding: 10px;
+      margin-top: 10px;
     }
 
+    .popup {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      color: black;
+      padding: 20px;
+      display: none;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .popup button {
+      width: 100%;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- Welcome Screen -->
-  <div id="welcome" class="container hidden">
-    <h1>Калорио</h1>
+<!-- WELCOME -->
+<div id="welcome" class="screen">
+  <div class="logo">Калорио</div>
 
-    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" />
+  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c">
 
-    <h1>Добро пожаловать в Калорио</h1>
-    <p>Ваш персональный помощник в поддержании здорового образа жизни</p>
-
-    <button class="start-btn" onclick="startApp()">Начать</button>
+  <div class="title">
+    Добро пожаловать в
+    <span>Калорио</span>
   </div>
 
-  <!-- Home Screen -->
-  <div id="home" class="container hidden">
-    <h1>Загрузите фото еды</h1>
-
-    <input type="file" id="fileInput" />
-
-    <br />
-
-    <button class="upload-btn" onclick="analyze()">Анализировать</button>
-
-    <pre id="result"></pre>
+  <div class="subtitle">
+    Ваш помощник в здоровом питании
   </div>
 
-  <script>
-    function startApp() {
-      localStorage.setItem("started", "true");
-      showHome();
-    }
+  <button class="white" onclick="start()">Начать</button>
+</div>
 
-    function showHome() {
-      document.getElementById("welcome").classList.add("hidden");
-      document.getElementById("home").classList.remove("hidden");
-    }
+<!-- HOME -->
+<div id="home" class="screen">
 
-    function showWelcome() {
-      document.getElementById("welcome").classList.remove("hidden");
-      document.getElementById("home").classList.add("hidden");
-    }
+  <div class="logo">Калорио</div>
 
-    async function analyze() {
-      const file = document.getElementById("fileInput").files[0];
-      if (!file) return alert("Выберите фото");
+  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c">
 
-      const formData = new FormData();
-      formData.append("image", file);
+  <div class="card">Всего: <span id="total">0</span></div>
+  <div class="card">Завтрак: <span id="breakfast">0</span></div>
+  <div class="card">Обед: <span id="lunch">0</span></div>
+  <div class="card">Ужин: <span id="dinner">0</span></div>
 
-      const res = await fetch("/analyze", {
-        method: "POST",
-        body: formData
-      });
+  <button class="white" onclick="pickImage()">Отсканировать</button>
 
-      const data = await res.json();
-      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
-    }
+</div>
 
-    // Проверка при загрузке
-    if (localStorage.getItem("started")) {
-      showHome();
-    } else {
-      showWelcome();
-    }
-  </script>
+<input type="file" id="fileInput" hidden onchange="handleFile(event)" />
+
+<div class="popup" id="popup">
+  <div>Куда добавить?</div>
+  <button onclick="addMeal('breakfast')">Завтрак</button>
+  <button onclick="addMeal('lunch')">Обед</button>
+  <button onclick="addMeal('dinner')">Ужин</button>
+</div>
+
+<script>
+
+let meals = { breakfast: [], lunch: [], dinner: [] };
+let lastResult = null;
+
+function start() {
+  localStorage.setItem("started", "true");
+  showHome();
+}
+
+function showHome() {
+  document.getElementById("welcome").classList.remove("active");
+  document.getElementById("home").classList.add("active");
+}
+
+function showWelcome() {
+  document.getElementById("home").classList.remove("active");
+  document.getElementById("welcome").classList.add("active");
+}
+
+function pickImage() {
+  document.getElementById("fileInput").click();
+}
+
+async function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch("/analyze", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  lastResult = data;
+  document.getElementById("popup").style.display = "block";
+}
+
+function addMeal(type) {
+  meals[type].push(lastResult);
+  document.getElementById("popup").style.display = "none";
+  updateUI();
+}
+
+function updateUI() {
+  const b = sum(meals.breakfast);
+  const l = sum(meals.lunch);
+  const d = sum(meals.dinner);
+
+  document.getElementById("breakfast").innerText = b;
+  document.getElementById("lunch").innerText = l;
+  document.getElementById("dinner").innerText = d;
+  document.getElementById("total").innerText = b + l + d;
+}
+
+function sum(arr) {
+  return arr.reduce((a, i) => a + (i.calories || 0), 0);
+}
+
+// запуск
+if (localStorage.getItem("started")) {
+  showHome();
+} else {
+  showWelcome();
+}
+
+</script>
 
 </body>
 </html>
